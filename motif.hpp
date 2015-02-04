@@ -10,7 +10,7 @@
 #ifndef _motif_h_
 #define _motif_h_
 
-#include "midi/midi.h"
+#include "midi/midi.hpp"
 
 #include <vector>
 #include <random>

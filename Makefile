@@ -5,9 +5,9 @@ CC = g++ -g
 CFLAGS = -Wall -Wextra -c -std=c++11
 LFLAGS =
 
-TESTMOTIF_OBJ = testmotif.o motif.o midi.a
-TESTTHEME_OBJ = testtheme.o theme.o motif.o midi.a
-TESTPIECE_OBJ = testpiece.o piece.o theme.o motif.o midi.a
+TESTMOTIF_OBJ = testmotif.o motif.o libmidi.a
+TESTTHEME_OBJ = testtheme.o theme.o motif.o libmidi.a
+TESTPIECE_OBJ = testpiece.o piece.o theme.o motif.o libmidi.a
 
 test: testmotif testtheme testpiece
 

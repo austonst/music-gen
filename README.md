@@ -20,9 +20,9 @@ This depends on my midi library, which can be found at https://github.com/auston
 The build system for this library is still very primitive (hand-written Linux Makefile). Also, this requires that:
 
 * The headers to my midi library be either in a "midi" subdirectory, or be in a midi folder in some system location such as /usr/include/midi.
-* The object files for my midi library need to be *ar*'d into midi.a and placed alongside these source files.
+* The static library produced by the midi library (libmidi.a) needs to be placed alongside these source files.
 
-Sorry about the complexity there; maybe I'll change it later. Currently, assuming you have *make*, *g++*, and the midi library properly set up, you should be able to build with a simple call to *make*.
+Sorry about the complexity there; I'll change it as soon as I update this to CMake. Currently, assuming you have *make*, *g++*, and the midi library properly set up, you should be able to build with a simple call to *make*.
 
 This will produce three executables.
 
@@ -33,7 +33,7 @@ This will produce three executables.
 ##To-do
 There's really a lot of directions this could be taken. Here's a few ideas:
 
-* Motifs are currently created by choosing random notes near the last played note for random durations. Would motifs sound better if they started off as one note for the whole duration, then went through a series of splits and perturbations?
+* Motifs are currently created by choosing random notes near the last played note for random durations. Would motifs sound better if they started off as one note for the whole duration, then went through a series of splits and perturbations? Maybe generate a random Fourier series and sample it to get a motif's notes?
 * There is currently no tempo variance. How should that be accomplished without making listeners lose track of the beat?
 * Chord progressions are like motifs of their own. They shouldn't be completely random, but what sort of structure makes sense, and how do we avoid hard-coding in a limited amount of progressions which fails to capture the full range of music?
 * This only generates melodies. What about everything else? Harmonies? Accompanying chords? Introductions with some music before the real melody starts?

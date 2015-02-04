@@ -14,7 +14,7 @@
 #define _motif_cpp_
 
 #include "motif.hpp"
-#include "midi/scales.h"
+#include "midi/scales.hpp"
 
 #include <math.h>
 
