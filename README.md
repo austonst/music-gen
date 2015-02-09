@@ -15,16 +15,9 @@ If motifs are words, said over the course of a measure or two, a theme is a sent
 We can then say a piece (or maybe, song) is a combination of themes. The themes which barely change make up the chorus. The abstract, mutable themes make up the rest of the piece, but are still based off of the same motifs as everything else. This is the structure this project uses, and while it is far from great at producing music, it is great at asking questions about why music is music.
 
 ##Building
-This depends on my midi library, which can be found at https://github.com/austonst/midi . I've only tested it using g++ 4.7-4.8 under 32 bit Linux, though I think it should be entirely cross-platform.
+The (meta) build system for the current testing executables is CMake. The only dependency is my midi library, which can be found at https://github.com/austonst/midi . If you install the midi library to a non-standard path (say, using a different CMAKE_INSTALL_PREFIX), point to the same prefix when building this program by specifying the CMake variable MIDI_ROOT.
 
-The build system for this library is still very primitive (hand-written Linux Makefile). Also, this requires that:
-
-* The headers to my midi library be either in a "midi" subdirectory, or be in a midi folder in some system location such as /usr/include/midi.
-* The static library produced by the midi library (libmidi.a) needs to be placed alongside these source files.
-
-Sorry about the complexity there; I'll change it as soon as I update this to CMake. Currently, assuming you have *make*, *g++*, and the midi library properly set up, you should be able to build with a simple call to *make*.
-
-This will produce three executables.
+Run CMake and then the build system of your choice to compile. This will produce three executables:
 
 * testmotif will generate a random motif and play it back repeatedly with increasing amounts of variance. Ideally, it should start to sound less and less like the first motif played, but still be somewhat recognizable.
 * testtheme will generate multiple themes which share some global motifs, then play back multiple variations on each theme.
