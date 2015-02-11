@@ -14,6 +14,53 @@
 #include <chrono>
 #include <math.h>
 
+//Default constructor, sets to minimum strictness
+PieceSettings::PieceSettings() :
+  length(0),
+  instrumentMel(midi::INST_ACOUSTIC_GRAND_PIANO)
+{
+  setStrictness(1);
+}
+
+//Constructor to set up required fields and optionally strictness
+//If no strictness specified, sets to minimum
+PieceSettings::PieceSettings(float inLength, midi::Instrument inInst,
+                             uint8_t strict) :
+  length(inLength),
+  instrumentMel(inInst)
+{
+  setStrictness(strict);
+}
+
+void PieceSettings::setStrictness(uint8_t strict)
+{
+  strictness = strict;
+
+  maxMutations = 70 - strictness*10;
+  numThemes = length/(6+strictness*2) + 0.5;
+  
+  if (strictness <= 1)
+    {
+      allowFractionalMotifs = true;
+    }
+  else if (strictness == 2)
+    {
+      allowFractionalMotifs = true;
+    }
+  else if (strictness == 3)
+    {
+      allowFractionalMotifs = false;
+    }
+  else if (strictness == 4)
+    {
+      allowFractionalMotifs = false;
+    }
+  else // >= 5
+    {
+      allowFractionalMotifs = false;
+    }
+}
+
 //Generating constructor
 Piece::Piece(const PieceSettings& set)
 {
@@ -30,20 +77,18 @@ void Piece::generate(PieceSettings set)
   //Create some global motifs
   //Number should be a function of length
 
-  MotifGenSettings amSet;
-  amSet.strictness = set.strictness;
-  amSet.gen = &gen;
+  MotifGenSettings amSet(1, &gen, set.strictness);
   
   std::vector<AbstractMotif> globalMotifs;
   for (uint8_t i = 0; i < set.length/10; i++)
     {
-      //Strictness 1-2: Length can be 1, 1.5 , or 2
-      if (set.strictness <= 2)
+      //allowFractionalMotifs true: length can be 1, 1.5 , or 2
+      if (set.allowFractionalMotifs)
         {
           std::uniform_int_distribution<uint8_t> distMotifLen(0,2);
           amSet.length = (float(distMotifLen(gen))/2) + 1;
         }
-      else //Strictness 3-5: Length can be 1 or 2
+      else //Otherwise, Length can be 1 or 2
         {
           std::uniform_int_distribution<uint8_t> distMotifLen(0,1);
           amSet.length = distMotifLen(gen) + 1;
@@ -66,19 +111,12 @@ void Piece::generate(PieceSettings set)
   std::uniform_int_distribution<uint8_t> distKeyType(0,2);
   uint8_t keyType = distKeyType(gen);
 
-  //Maximum number of mutations per motif is a function of strictness
-  uint32_t maxMutations = 70 - set.strictness*10;
-
   //Generate a bunch of abstract themes with varying length and concreteness
-  uint16_t numThemes = set.length/(6+set.strictness*2) + 0.5;
   std::vector<AbstractTheme> abstrThemes;
-  ThemeGenSettings atSet;
-  atSet.strictness = set.strictness;
-  atSet.motifs = globalMotifs;
-  atSet.gen = &gen;
+  ThemeGenSettings atSet(0, globalMotifs, 0, &gen, set.strictness);
   std::uniform_int_distribution<uint8_t> distThemeLen(3,6);
   std::uniform_real_distribution<float> distConcrete(0,1);
-  for (uint16_t i = 0; i < numThemes; i++)
+  for (uint16_t i = 0; i < set.numThemes; i++)
     {
       atSet.length = distThemeLen(gen);
       atSet.concreteness = distConcrete(gen);
@@ -88,15 +126,10 @@ void Piece::generate(PieceSettings set)
   //Now concretize it!
   std::vector<ConcreteTheme> concThemes;
   uint32_t length = 0;
-  ThemeConcreteSettings ctSet;
-  ctSet.strictness = set.strictness;
-  ctSet.keyType = keyType;
-  ctSet.maxMutations = maxMutations;
-  ctSet.instrument = set.instrumentMel;
-  ctSet.ticksPerQuarter = 1500; //Just some number that works... Could randomize it
-  ctSet.gen = &gen;
-  set.length *= 6000;
-  std::uniform_int_distribution<uint8_t> distAbsTheme(0, numThemes-1);
+  ThemeConcreteSettings ctSet(0, keyType, set.maxMutations, set.instrumentMel,
+                              1500 /*No justifiation*/, &gen, set.strictness);
+
+  std::uniform_int_distribution<uint8_t> distAbsTheme(0, set.numThemes-1);
   std::uniform_int_distribution<uint8_t> distSelectKey(0, keys.size()-1);
   while (length < set.length)
     {

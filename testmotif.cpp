@@ -20,18 +20,9 @@ int main()
   gen.seed(std::chrono::system_clock::now().time_since_epoch().count());
   
   //Settings
-  MotifGenSettings set1;
-  set1.strictness = 2;
-  set1.length = 2;
-  set1.gen = &gen;
-  MotifConcreteSettings set2;
-  set2.strictness = 2;
-  set2.key = "C4";
-  set2.keyType = 0;
-  set2.mutations = 0;
-  set2.instrument = 0;
-  set2.ticksPerQuarter = 1000;
-  set2.gen = &gen;
+  MotifGenSettings set1(2, &gen, 2);
+  MotifConcreteSettings set2("C4", 0, 0, midi::INST_ACOUSTIC_GRAND_PIANO, 1000,
+                             false, 0, &gen, 2);
 
   //Abstract
   AbstractMotif am(set1);

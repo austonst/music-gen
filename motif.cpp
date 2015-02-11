@@ -18,6 +18,112 @@
 
 #include <math.h>
 
+//Default constructor, sets to minimum strictness
+MotifGenSettings::MotifGenSettings() :
+  length(0),
+  gen(nullptr)
+{
+  setStrictness(0);
+}
+
+//Constructor to set up required fields and optionally strictness
+MotifGenSettings::MotifGenSettings(float inLength, std::mt19937* inGen,
+                                   uint8_t strict) :
+  length(inLength),
+  gen(inGen)
+{
+  setStrictness(strict);
+}
+
+void MotifGenSettings::setStrictness(uint8_t strict)
+{
+  strictness = strict;
+  
+  if (strictness <= 1)
+    {
+      noteAlign = 0;
+      forceFirstNote0 = false;
+      noteSelection = 0;
+    }
+  else if (strictness == 2)
+    {
+      noteAlign = 0;
+      forceFirstNote0 = false;
+      noteSelection = 1;
+    }
+  else if (strictness == 3)
+    {
+      noteAlign = 8;
+      forceFirstNote0 = false;
+      noteSelection = 1;
+    }
+  else if (strictness == 4)
+    {
+      noteAlign = 4;
+      forceFirstNote0 = true;
+      noteSelection = 1;
+    }
+  else // >= 5
+    {
+      noteAlign = 2;
+      forceFirstNote0 = true;
+      noteSelection = 1;
+    }
+}
+
+//Default constructor, sets to minimum strictness
+MotifConcreteSettings::MotifConcreteSettings() :
+  key(0),
+  keyType(0),
+  mutations(0),
+  instrument(midi::INST_ACOUSTIC_GRAND_PIANO),
+  ticksPerQuarter(1500), //No justification for this
+  forceStartNote(false),
+  gen(nullptr)
+{
+  setStrictness(1);
+}
+
+//Constructor to set up required fields and optionally strictness
+//If no strictness specified, sets to minimum
+MotifConcreteSettings::MotifConcreteSettings(midi::Note inKey, uint8_t inType,
+                                             uint32_t inMut, midi::Instrument inInst,
+                                             uint32_t inTPQ, bool inForceStart,
+                                             int8_t inStart, std::mt19937* inGen,
+                                             uint8_t strict) :
+  key(inKey),
+  keyType(inType),
+  mutations(inMut),
+  instrument(inInst),
+  ticksPerQuarter(inTPQ), //No justification for this
+  forceStartNote(inForceStart),
+  startNote(inStart),
+  gen(inGen)
+{
+  setStrictness(strict);
+}
+
+void MotifConcreteSettings::setStrictness(uint8_t strict)
+{
+  strictness = strict;
+  
+  if (strictness <= 1)
+    {
+    }
+  else if (strictness == 2)
+    {
+    }
+  else if (strictness == 3)
+    {
+    }
+  else if (strictness == 4)
+    {
+    }
+  else // >= 5
+    {
+    }
+}
+
 //General use constructor
 AbstractMotif::AbstractMotif(const MotifGenSettings& set)
 {
@@ -47,18 +153,10 @@ void AbstractMotif::generate(const MotifGenSettings& set)
       while (rand < 0) rand = distLen(*(set.gen)) + offset;
       float noteLength = 1.0 / float(1 << rand);
 
-      //Strictness 3-5: Notes should start on multiples of their note length
-      if (set.strictness == 5)
+      //If noteAlign set, notes should start on multiples of their note length
+      if (set.noteAlign > 0.001)
         {
-          while (fmod(pos,noteLength/2) > 0.001) noteLength /= 2;
-        }
-      else if (set.strictness == 4)
-        {
-          while (fmod(pos,noteLength/4) > 0.001) noteLength /= 2;
-        }
-      else if (set.strictness == 3)
-        {
-          while (fmod(pos,noteLength/8) > 0.001) noteLength /= 2;
+          while (fmod(pos,noteLength/set.noteAlign) > 0.001) noteLength /= 2;
         }
 
       //Notes should ALWAYS be aligned to whole notes when at measure bounds
@@ -78,17 +176,17 @@ void AbstractMotif::generate(const MotifGenSettings& set)
       ant.begin = pos*32 + .001;
       ant.duration = noteLength*32 + .001;
 
-      //Strictness 4-5: First note must be 0
-      if (notes_.size() == 0 && set.strictness >= 4)
+      //Depending on forceFirstNote0, first note must be 0
+      if (notes_.size() == 0 && set.forceFirstNote0)
         {
           ant.note = 0;
         }
-      //Strictness 1: Note can be anywhere in the scale of the octave
-      else if (set.strictness == 1)
+      //If noteSelection is 0, note can be anywhere in the scale of the octave
+      else if (set.noteSelection == 0)
         {
           ant.note = distNote(*(set.gen));
         }
-      else //Strictness 2-5: Note is selected from a normal dist centered on last note
+      else //noteSelection=1: note is selected using normal distribution
         {
           std::normal_distribution<float> distNormNote(lastNote, 2);
           float normNote;
@@ -299,17 +397,6 @@ uint32_t ConcreteMotif::ticks() const
           longest = notes_[i].begin + notes_[i].duration;
         }
     }
-
-  //Strictness 1: Just return the length
-  /*if (set_.strictness == 1)
-    {
-      return longest;
-    }
-  else //Strictness 2-5: Pad to quarter note
-    {
-      uint8_t quarterNotes = ((longest)/(set_.ticksPerQuarter)) + 1;
-      return quarterNotes*set_.ticksPerQuarter;
-      }*/
   return longest;
 }
 

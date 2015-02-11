@@ -15,15 +15,37 @@
 
 struct PieceSettings
 {
+  //Default constructor, sets to minimum strictness
+  PieceSettings();
+
+  //Constructor to set up required fields and optionally strictness
+  //If no strictness specified, sets to minimum
+  PieceSettings(float inLength, midi::Instrument inInst, uint8_t strict = 1);
+  
+  //Sets up values corresponding to a certain strictness
+  //Does not properly set length or instrument
+  void setStrictness(uint8_t strict);
+
+  //--- Strictness Independent Variables ---
   //The overall (approximate) length of the piece in whole notes
   uint32_t length;
 
+  //The instrument that will play the melody
+  midi::Instrument instrumentMel;
+
+  //--- Strictness Dependent Variables ---
   //The strictness of the piece on a scale from 1-5
   //1 will produce very random pieces, 5 will produce standard music sounding pieces
   uint8_t strictness;
 
-  //The instrument that will play the melody
-  midi::Instrument instrumentMel;
+  //Allow for motifs of length 1.5 measures
+  bool allowFractionalMotifs;
+
+  //Maximum number of mutations per motif is a function of stiffness
+  uint32_t maxMutations;
+
+  //The number of themes to generate is a function of stiffness
+  uint16_t numThemes;
 };
 
 class Piece

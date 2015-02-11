@@ -27,22 +27,60 @@ struct AbstractNoteTime
 //Helper struct for AbstractMotif generation
 struct MotifGenSettings
 {
-  //The strictness of the theme
-  uint8_t strictness;
+  //Default constructor, sets to minimum strictness
+  MotifGenSettings();
+
+  //Constructor to set up required fields and optionally strictness
+  //If no strictness specified, sets to minimum
+  MotifGenSettings(float inLength, std::mt19937* inGen, uint8_t strict = 1);
   
+  //Sets up values corresponding to a certain strictness
+  //Does not set length or gen!
+  void setStrictness(uint8_t strict);
+
+  //--- Strictness Independent Variables ---
   //The length of the motif in whole notes
   float length;
 
   //A pointer to a random number generator to be used in generation
   std::mt19937* gen;
+
+  //--- Strictness Dependent Variables ---
+  //If setStrictness used to generate this, this stores the given value
+  uint8_t strictness;
+  
+  //A value of X here will make notes align their start time to a
+  //multiple of notelength/X. A value of 0 means to not try to align.
+  float noteAlign;
+
+  //Force the first note of the motif to be 0
+  bool forceFirstNote0;
+
+  //When 0, notes are chosen randomly in the octave
+  //When 1, notes are selected from a normal dist centered on last note
+  uint8_t noteSelection;
+
+  
 };
 
 //Helper struct for ConcreteMotif generation from an AbstractMotif
 struct MotifConcreteSettings
 {
-  //The strictness of the theme
-  uint8_t strictness;
+  //Default constructor, sets to minimum strictness
+  MotifConcreteSettings();
+
+  //Constructor to set up required fields and optionally strictness
+  //If no strictness specified, sets to minimum
+  MotifConcreteSettings(midi::Note inKey, uint8_t inType, uint32_t inMut,
+                        midi::Instrument inInst, uint32_t inTPQ,
+                        bool inForceStart, int8_t inStart, std::mt19937* inGen,
+                        uint8_t strict = 1);
   
+  //Sets up values corresponding to a certain strictness
+  //Currently has no effect
+  void setStrictness(uint8_t strictness);
+
+  //--- Strictness Independent Variables ---
   //The key of the concrete motif
   midi::Note key;
 
@@ -64,6 +102,10 @@ struct MotifConcreteSettings
 
   //A pointer to a Mersenne Twister to be used in generation
   std::mt19937* gen;
+
+  //--- Strictness Dependent Variables ---
+  //If setStrictness used to generate this, this stores the given value
+  uint8_t strictness;
 };
 
 //An abstract motif, which contains the main information about a motif but lacks

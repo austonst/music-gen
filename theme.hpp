@@ -15,30 +15,64 @@
 //Helper struct for AbstractTheme generation
 struct ThemeGenSettings
 {
-  //The strictness of the theme
-  uint8_t strictness;
+  //Default constructor, sets to minimum strictness
+  ThemeGenSettings();
+
+  //Constructor to set up required fields and optionally strictness
+  //If no strictness specified, sets to minimum
+  ThemeGenSettings(float inLength, std::vector<AbstractMotif>& inMotifs,
+                   float inConc, std::mt19937* inGen, uint8_t strict = 1);
   
+  //Sets up values corresponding to a certain strictness
+  //Does not properly set length, motifs, concreteness or gen!
+  void setStrictness(uint8_t strict);
+
+  //--- Strictness Independent Variables ---
   //The approximate length of the theme in whole notes
   float length;
 
   //Abstract motifs which are reused throughout the piece and can be used here
   std::vector<AbstractMotif> motifs;
 
-  //A pointer to a random number generator to be used in generation
-  std::mt19937* gen;
-
   //The concreteness of the theme from 0 (no mutations) to 1 (full mutations)
   //Low concreteness makes themes good for choruses and stuff
   //High concreteness makes for random sounding music that still follows common motifs
   float concreteness;
+
+  //A pointer to a random number generator to be used in generation
+  std::mt19937* gen;
+
+  //--- Strictness Dependent Variables ---
+  //The strictness of the theme
+  uint8_t strictness;
+
+  //If true, motif length can be a non-integer measure length
+  bool nonIntMotifs;
+
+  //If true, have an increased chance of repeating the previous motif
+  bool extraRepeatWeight;
+  
+  //If true and weightMotifRepeat true, have extra weight decay with repetition
+  bool decayRepeatWeight;
 };
 
 //Helper struct for ConcreteTheme generation from an AbstractTheme
 struct ThemeConcreteSettings
 {
-  //The strictness of the theme
-  uint8_t strictness;
+  //Default constructor, sets to minimum strictness
+  ThemeConcreteSettings();
+
+  //Constructor to set up required fields and optionally strictness
+  //If no strictness specified, sets to minimum
+  ThemeConcreteSettings(midi::Note inKey, uint8_t inType, uint32_t inMut,
+                        midi::Instrument inInst, uint32_t inTPQ,
+                        std::mt19937* inGen, uint8_t strict = 1);
   
+  //Sets up values corresponding to a certain strictness
+  //Currently has no effect
+  void setStrictness(uint8_t strict);
+
+  //--- Strictness Independent Variables ---
   //The base key of the concrete theme
   midi::Note key;
 
@@ -56,6 +90,10 @@ struct ThemeConcreteSettings
 
   //A pointer to a Mersenne Twister to be used in generation
   std::mt19937* gen;
+
+  //--- Strictness Dependent Variables ---
+  //The strictness of the theme
+  uint8_t strictness;
 };
 
 //An abstract theme, which contains the main information about a theme but lacks

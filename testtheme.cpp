@@ -20,9 +20,7 @@ int main()
   gen.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
   //Settings
-  MotifGenSettings set1;
-  set1.length = 1.5;
-  set1.gen = &gen;
+  MotifGenSettings set1(1.5, &gen, 3);
 
   //Create some global abstract motifs
   std::vector<AbstractMotif> am;
@@ -35,11 +33,7 @@ int main()
   am.push_back(AbstractMotif(set1));
 
   //Abstract themes
-  ThemeGenSettings set2;
-  set2.length = 3;
-  set2.motifs = am;
-  set2.gen = &gen;
-  set2.concreteness = .25;
+  ThemeGenSettings set2(3, am, .25, &gen, 3);
   AbstractTheme at1(set2);
   set2.concreteness = .5;
   AbstractTheme at2(set2);
@@ -50,14 +44,8 @@ int main()
   AbstractTheme at5(set2);
 
   //Concrete themes
-  ThemeConcreteSettings set3;
-  set3.key = "C4";
-  set3.keyType = 0;
-  set3.maxMutations = 80;
-  set3.instrument = 0;
-  set3.ticksPerQuarter = 1500;
-  set3.gen = &gen;
-
+  ThemeConcreteSettings set3("C4", 0, 80, midi::INST_ACOUSTIC_GRAND_PIANO,
+                             1500, &gen, 3);
 
   midi::NoteTrack nt;
   uint32_t ticks = 0;

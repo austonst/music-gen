@@ -12,6 +12,112 @@
 
 #include "theme.hpp"
 
+//Default constructor, sets to minimum strictness
+ThemeGenSettings::ThemeGenSettings() :
+  length(0),
+  concreteness(1),
+  gen(nullptr)
+{
+  setStrictness(1);
+}
+
+//Constructor to set up required fields and optionally strictness
+//If no strictness specified, sets to minimum
+ThemeGenSettings::ThemeGenSettings(float inLength, std::vector<AbstractMotif>& inMotifs,
+                                   float inConc, std::mt19937* inGen, uint8_t strict) :
+  length(inLength),
+  motifs(inMotifs),
+  concreteness(inConc),
+  gen(inGen)
+{
+  setStrictness(strict);
+}
+
+void ThemeGenSettings::setStrictness(uint8_t strict)
+{
+  strictness = strict;
+  
+  if (strictness <= 1)
+    {
+      nonIntMotifs = true;
+      extraRepeatWeight = false;
+      decayRepeatWeight = false;
+    }
+  else if (strictness == 2)
+    {
+      nonIntMotifs = true;
+      extraRepeatWeight = false;
+      decayRepeatWeight = false;
+    }
+  else if (strictness == 3)
+    {
+      nonIntMotifs = false;
+      extraRepeatWeight = true;
+      decayRepeatWeight = false;
+    }
+  else if (strictness == 4)
+    {
+      nonIntMotifs = false;
+      extraRepeatWeight = true;
+      decayRepeatWeight = true;
+    }
+  else // >= 5
+    {
+      nonIntMotifs = false;
+      extraRepeatWeight = true;
+      decayRepeatWeight = true;
+    }
+}
+
+//Default constructor, sets to minimum strictness
+ThemeConcreteSettings::ThemeConcreteSettings() :
+  key(0),
+  keyType(0),
+  maxMutations(0),
+  instrument(midi::INST_ACOUSTIC_GRAND_PIANO),
+  ticksPerQuarter(1500), //No justification for this
+  gen(nullptr)
+{
+  setStrictness(1);
+}
+
+//Constructor to set up required fields and optionally strictness
+//If no strictness specified, sets to minimum
+ThemeConcreteSettings::ThemeConcreteSettings(midi::Note inKey, uint8_t inType,
+                                             uint32_t inMut, midi::Instrument inInst,
+                                             uint32_t inTPQ, std::mt19937* inGen,
+                                             uint8_t strict) :
+  key(inKey),
+  keyType(inType),
+  maxMutations(inMut),
+  instrument(inInst),
+  ticksPerQuarter(inTPQ),
+  gen(inGen)
+{
+  setStrictness(strict);
+}
+
+void ThemeConcreteSettings::setStrictness(uint8_t strict)
+{
+  strictness = strict;
+  
+  if (strictness <= 1)
+    {
+    }
+  else if (strictness == 2)
+    {
+    }
+  else if (strictness == 3)
+    {
+    }
+  else if (strictness == 4)
+    {
+    }
+  else // >= 5
+    {
+    }
+}
+
 //Standard constructor, generates a new AbstractTheme
 AbstractTheme::AbstractTheme(const ThemeGenSettings& set)
 {
@@ -22,29 +128,27 @@ AbstractTheme::AbstractTheme(const ThemeGenSettings& set)
 void AbstractTheme::generate(const ThemeGenSettings& set)
 {
   //Create some more motifs to be used here only
-  MotifGenSettings mgs1;
-  MotifGenSettings mgs15;
-  MotifGenSettings mgs2;
+  MotifGenSettings mgs1(1, set.gen, set.strictness);
+  MotifGenSettings mgs15(1.5, set.gen, set.strictness);
+  MotifGenSettings mgs2(2, set.gen, set.strictness);
 
   std::uniform_int_distribution<uint8_t> distTimeSig(0,2);
   uint8_t timesig = distTimeSig(*(set.gen));
   if (timesig == 0) //3 beats per measure
     {
-      mgs1 =  {set.strictness, .75,   set.gen};
-      mgs15 = {set.strictness, 1.125, set.gen};
-      mgs2 =  {set.strictness, 1.5,   set.gen};
+      mgs1.length *= 3./4.;
+      mgs15.length *= 3./4.;
+      mgs2.length *= 3./4.;
     }
   else if (timesig == 1) //4 beats per measure
     {
-      mgs1 =  {set.strictness, 1,   set.gen};
-      mgs15 = {set.strictness, 1.5, set.gen};
-      mgs2 =  {set.strictness, 2,   set.gen};
+      //Already set to this length!
     }
   else //5 beats per measure
     {
-      mgs1 =  {set.strictness, 1.25,   set.gen};
-      mgs15 = {set.strictness, 1.825, set.gen};
-      mgs2 =  {set.strictness, 2.5,   set.gen};
+      mgs1.length *= 5./4.;
+      mgs15.length *= 5./4.;
+      mgs2.length *= 5./4.;
     }
 
   //Even amounts of local and global motifs
@@ -57,8 +161,8 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
         {
           localMotifs.push_back(AbstractMotif(mgs1));
         }
-      //Strictness 1-2: Allow for motifs of non-measure length
-      else if (rand == 1 && set.strictness <= 2)
+      //If nonIntMotifs set, allow for motifs of non-measure length
+      else if (rand == 1 && set.nonIntMotifs)
         {
           localMotifs.push_back(AbstractMotif(mgs15));
         }
@@ -79,8 +183,8 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
       //Select motif
       AbstractMotif select;
       
-      //Strictness 1-2: Choose motif at random
-      if (set.strictness <= 2 || length == 0)
+      //If extraRepeatWeight false, choose motif at random
+      if (!set.extraRepeatWeight || length == 0)
         {
           uint16_t rand = distMotif(*(set.gen));
           if (rand > localMotifs.size()-1)
@@ -92,8 +196,9 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
               select = set.motifs[rand];
             }
         }
-      //Strictness 3: Have an increased chance of repeating the previous motif
-      else if (set.strictness == 3) 
+      //if decayRepeatWeight false, have a flatly increased chance of repeating
+      //the previous motif
+      else if (!set.decayRepeatWeight) 
         {
           std::uniform_real_distribution<float> prob(0,1);
           if (prob(*(set.gen)) < 0.3)
@@ -113,7 +218,8 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
                 }
             }
         }
-      //Strictness 4-5: Further increased chance of repetition, but falls off
+      //If decayRepeatweight true, further increased chance of repetition,
+      //but falls off
       else
         {
           std::uniform_real_distribution<float> prob(0,1);
@@ -148,7 +254,8 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
 }
 
 //Generate a new concrete theme as part of the constructor
-ConcreteTheme::ConcreteTheme(const AbstractTheme abstr, const ThemeConcreteSettings& set)
+ConcreteTheme::ConcreteTheme(const AbstractTheme abstr,
+                             const ThemeConcreteSettings& set)
 {
   generate(abstr, set);
 }
@@ -157,14 +264,9 @@ ConcreteTheme::ConcreteTheme(const AbstractTheme abstr, const ThemeConcreteSetti
 void ConcreteTheme::generate(const AbstractTheme abstr, ThemeConcreteSettings set)
 {
   //Pass down most of the settings directly
-  MotifConcreteSettings motifSet;
-  motifSet.strictness = set.strictness;
-  motifSet.key = set.key;
-  motifSet.keyType = set.keyType;
-  motifSet.instrument = set.instrument;
-  motifSet.gen = set.gen;
-  motifSet.ticksPerQuarter = set.ticksPerQuarter;
-  motifSet.forceStartNote = false;
+  MotifConcreteSettings motifSet(set.key, set.keyType, 0, set.instrument,
+                                 set.ticksPerQuarter, false, 0, set.gen,
+                                 set.strictness);
 
   //Mutations are dependent on concreteness of AbstractTheme
   set.maxMutations *= abstr.concrete();

@@ -13,10 +13,7 @@
 
 int main()
 {
-  PieceSettings set;
-  set.length = 20;
-  set.strictness = 5;
-  set.instrumentMel = 0;
+  PieceSettings set(20, midi::INST_ACOUSTIC_GRAND_PIANO, 5);
 
   Piece p(set);
   p.write("testpiece.mid");
