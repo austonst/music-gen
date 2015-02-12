@@ -17,7 +17,7 @@
 //Default constructor, sets to minimum strictness
 PieceSettings::PieceSettings() :
   length(0),
-  instrumentMel(midi::INST_ACOUSTIC_GRAND_PIANO)
+  instrumentMel(midi::Instrument::ACOUSTIC_GRAND_PIANO)
 {
   setStrictness(1);
 }

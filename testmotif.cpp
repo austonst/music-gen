@@ -21,7 +21,7 @@ int main()
   
   //Settings
   MotifGenSettings set1(2, &gen, 2);
-  MotifConcreteSettings set2("C4", 0, 0, midi::INST_ACOUSTIC_GRAND_PIANO, 1000,
+  MotifConcreteSettings set2("C4", 0, 0, midi::Instrument::ACOUSTIC_GRAND_PIANO, 1000,
                              false, 0, &gen, 2);
 
   //Abstract

@@ -76,7 +76,7 @@ MotifConcreteSettings::MotifConcreteSettings() :
   key(0),
   keyType(0),
   mutations(0),
-  instrument(midi::INST_ACOUSTIC_GRAND_PIANO),
+  instrument(midi::Instrument::ACOUSTIC_GRAND_PIANO),
   ticksPerQuarter(1500), //No justification for this
   forceStartNote(false),
   gen(nullptr)

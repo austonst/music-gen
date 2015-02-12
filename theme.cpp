@@ -74,7 +74,7 @@ ThemeConcreteSettings::ThemeConcreteSettings() :
   key(0),
   keyType(0),
   maxMutations(0),
-  instrument(midi::INST_ACOUSTIC_GRAND_PIANO),
+  instrument(midi::Instrument::ACOUSTIC_GRAND_PIANO),
   ticksPerQuarter(1500), //No justification for this
   gen(nullptr)
 {

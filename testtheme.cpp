@@ -44,7 +44,7 @@ int main()
   AbstractTheme at5(set2);
 
   //Concrete themes
-  ThemeConcreteSettings set3("C4", 0, 80, midi::INST_ACOUSTIC_GRAND_PIANO,
+  ThemeConcreteSettings set3("C4", 0, 80, midi::Instrument::ACOUSTIC_GRAND_PIANO,
                              1500, &gen, 3);
 
   midi::NoteTrack nt;
