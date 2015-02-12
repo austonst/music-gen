@@ -48,7 +48,7 @@ int main()
                              1500, &gen, 3);
 
   midi::NoteTrack nt;
-  uint32_t ticks = 0;
+  std::uint32_t ticks = 0;
 
   ConcreteTheme ct(at1, set3);
   ct.addToTrack(nt, ticks);

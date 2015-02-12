@@ -21,11 +21,11 @@ struct ThemeGenSettings
   //Constructor to set up required fields and optionally strictness
   //If no strictness specified, sets to minimum
   ThemeGenSettings(float inLength, std::vector<AbstractMotif>& inMotifs,
-                   float inConc, std::mt19937* inGen, uint8_t strict = 1);
+                   float inConc, std::mt19937* inGen, std::uint8_t strict = 1);
   
   //Sets up values corresponding to a certain strictness
   //Does not properly set length, motifs, concreteness or gen!
-  void setStrictness(uint8_t strict);
+  void setStrictness(std::uint8_t strict);
 
   //--- Strictness Independent Variables ---
   //The approximate length of the theme in whole notes
@@ -44,7 +44,7 @@ struct ThemeGenSettings
 
   //--- Strictness Dependent Variables ---
   //The strictness of the theme
-  uint8_t strictness;
+  std::uint8_t strictness;
 
   //If true, motif length can be a non-integer measure length
   bool nonIntMotifs;
@@ -64,36 +64,36 @@ struct ThemeConcreteSettings
 
   //Constructor to set up required fields and optionally strictness
   //If no strictness specified, sets to minimum
-  ThemeConcreteSettings(midi::Note inKey, uint8_t inType, uint32_t inMut,
-                        midi::Instrument inInst, uint32_t inTPQ,
-                        std::mt19937* inGen, uint8_t strict = 1);
+  ThemeConcreteSettings(midi::Note inKey, std::uint8_t inType, std::uint32_t inMut,
+                        midi::Instrument inInst, std::uint32_t inTPQ,
+                        std::mt19937* inGen, std::uint8_t strict = 1);
   
   //Sets up values corresponding to a certain strictness
   //Currently has no effect
-  void setStrictness(uint8_t strict);
+  void setStrictness(std::uint8_t strict);
 
   //--- Strictness Independent Variables ---
   //The base key of the concrete theme
   midi::Note key;
 
   //The main type of key (0=major, 1=harmonic 2=natural minor)
-  uint8_t keyType;
+  std::uint8_t keyType;
 
   //The maximum number of average mutation points per motif
-  uint32_t maxMutations;
+  std::uint32_t maxMutations;
 
-  //The intrument that will play this theme
+  //The instrument that will play this theme
   midi::Instrument instrument;
 
   //The conversion between abstract and concrete time
-  uint32_t ticksPerQuarter;
+  std::uint32_t ticksPerQuarter;
 
   //A pointer to a Mersenne Twister to be used in generation
   std::mt19937* gen;
 
   //--- Strictness Dependent Variables ---
   //The strictness of the theme
-  uint8_t strictness;
+  std::uint8_t strictness;
 };
 
 //An abstract theme, which contains the main information about a theme but lacks
@@ -108,7 +108,7 @@ class AbstractTheme
   void generate(const ThemeGenSettings& set);
 
   //Accessors
-  size_t numMotifs() const {return motifs_.size();}
+  std::size_t numMotifs() const {return motifs_.size();}
   AbstractMotif motif(int i) const {return motifs_[i];}
   float concrete() const {return concrete_;}
 
@@ -129,8 +129,8 @@ class ConcreteTheme
 
   //General use functions
   void generate(const AbstractTheme abstr, ThemeConcreteSettings set);
-  void addToTrack(midi::NoteTrack& nt, uint32_t begin);
-  uint32_t ticks() const;
+  void addToTrack(midi::NoteTrack& nt, std::uint32_t begin);
+  std::uint32_t ticks() const;
 
  private:
   //The concrete motifs, ready to be played!

@@ -16,7 +16,7 @@
 #include "motif.hpp"
 #include "midi/scales.hpp"
 
-#include <math.h>
+#include <cmath>
 
 //Default constructor, sets to minimum strictness
 MotifGenSettings::MotifGenSettings() :
@@ -28,14 +28,14 @@ MotifGenSettings::MotifGenSettings() :
 
 //Constructor to set up required fields and optionally strictness
 MotifGenSettings::MotifGenSettings(float inLength, std::mt19937* inGen,
-                                   uint8_t strict) :
+                                   std::uint8_t strict) :
   length(inLength),
   gen(inGen)
 {
   setStrictness(strict);
 }
 
-void MotifGenSettings::setStrictness(uint8_t strict)
+void MotifGenSettings::setStrictness(std::uint8_t strict)
 {
   strictness = strict;
   
@@ -86,11 +86,11 @@ MotifConcreteSettings::MotifConcreteSettings() :
 
 //Constructor to set up required fields and optionally strictness
 //If no strictness specified, sets to minimum
-MotifConcreteSettings::MotifConcreteSettings(midi::Note inKey, uint8_t inType,
-                                             uint32_t inMut, midi::Instrument inInst,
-                                             uint32_t inTPQ, bool inForceStart,
-                                             int8_t inStart, std::mt19937* inGen,
-                                             uint8_t strict) :
+MotifConcreteSettings::MotifConcreteSettings(midi::Note inKey, std::uint8_t inType,
+                                             std::uint32_t inMut, midi::Instrument inInst,
+                                             std::uint32_t inTPQ, bool inForceStart,
+                                             std::int8_t inStart, std::mt19937* inGen,
+                                             std::uint8_t strict) :
   key(inKey),
   keyType(inType),
   mutations(inMut),
@@ -103,7 +103,7 @@ MotifConcreteSettings::MotifConcreteSettings(midi::Note inKey, uint8_t inType,
   setStrictness(strict);
 }
 
-void MotifConcreteSettings::setStrictness(uint8_t strict)
+void MotifConcreteSettings::setStrictness(std::uint8_t strict)
 {
   strictness = strict;
   
@@ -136,11 +136,11 @@ void AbstractMotif::generate(const MotifGenSettings& set)
   //Variables and initialization
   float pos = 0;
   std::normal_distribution<float> distLen(2,1);
-  std::uniform_int_distribution<uint8_t> distNote(0,7);
+  std::uniform_int_distribution<std::uint8_t> distNote(0,7);
   std::normal_distribution<float> distLenOffset(.7,.5);
   length_ = set.length;
   notes_.clear();
-  int8_t lastNote = 0;
+  std::int8_t lastNote = 0;
 
   //Generate notes until it's full
   while (pos < set.length-0.001)
@@ -149,7 +149,7 @@ void AbstractMotif::generate(const MotifGenSettings& set)
       //So choose n in (2^n)th note from 0-5
       float offset = -1;
       while (offset < .2 || offset > 2) offset = distLenOffset(*(set.gen));
-      int8_t rand = -1;
+      std::int8_t rand = -1;
       while (rand < 0) rand = distLen(*(set.gen)) + offset;
       float noteLength = 1.0 / float(1 << rand);
 
@@ -226,25 +226,25 @@ ConcreteMotif::ConcreteMotif(const AbstractMotif& abstr, const MotifConcreteSett
 void ConcreteMotif::generate(AbstractMotif abstr, MotifConcreteSettings set)
 {
   //Keep track of limited changes
-  uint8_t numNotes = abstr.numNotes();
-  std::vector<uint8_t> limit0(numNotes, 0); //0: Unmodified, 1: Up, 2: Down
-  //std::vector<uint8_t> limit1(numNotes, 0); //0: Unmodified, 1: Modified
-  uint8_t limit2 = 0; //0: Unmodified, 1: Up, 2: Down
-  uint8_t limit3 = 0; //0: Unmodified, 1: Modified
-  uint8_t limit4 = 0; //0: Unmodified, 1: Up, 2: Down
-  std::vector<uint8_t> limit5(numNotes, 0); //0: Unmodified, 1: Long, 2: Short
+  std::uint8_t numNotes = abstr.numNotes();
+  std::vector<std::uint8_t> limit0(numNotes, 0); //0: Unmodified, 1: Up, 2: Down
+  //std::vector<std::uint8_t> limit1(numNotes, 0); //0: Unmodified, 1: Modified
+  std::uint8_t limit2 = 0; //0: Unmodified, 1: Up, 2: Down
+  std::uint8_t limit3 = 0; //0: Unmodified, 1: Modified
+  std::uint8_t limit4 = 0; //0: Unmodified, 1: Up, 2: Down
+  std::vector<std::uint8_t> limit5(numNotes, 0); //0: Unmodified, 1: Long, 2: Short
 
   //Set up RNG
-  std::uniform_int_distribution<uint8_t> distMut(0,0);
-  std::uniform_int_distribution<uint8_t> distBool(0,1);
-  std::uniform_int_distribution<uint32_t> distNote(0,numNotes-1);
+  std::uniform_int_distribution<std::uint8_t> distMut(0,0);
+  std::uniform_int_distribution<std::uint8_t> distBool(0,1);
+  std::uniform_int_distribution<std::uint32_t> distNote(0,numNotes-1);
 
   //Repeatedly apply mutations until mutation points are depleted or
   //a certain number of tries is exceeded without success
-  const uint8_t MAX_FAILURES = 20;
-  uint8_t currentFailures = 0;
-  uint32_t pointsSpent = 0;
-  uint32_t note;
+  const std::uint8_t MAX_FAILURES = 20;
+  std::uint8_t currentFailures = 0;
+  std::uint32_t pointsSpent = 0;
+  std::uint32_t note;
   while (currentFailures < MAX_FAILURES && pointsSpent < set.mutations)
     {
       bool success = false;
@@ -339,7 +339,7 @@ void ConcreteMotif::generate(AbstractMotif abstr, MotifConcreteSettings set)
         }
     }
 
-  int8_t diffNote = 0;
+  std::int8_t diffNote = 0;
   if (set.forceStartNote)
     {
       std::normal_distribution<float> distNormNote(0, 2);
@@ -348,7 +348,7 @@ void ConcreteMotif::generate(AbstractMotif abstr, MotifConcreteSettings set)
 
   //Convert all of the abstract notes to concrete notes
   notes_.clear();
-  for (size_t i = 0; i < numNotes; i++)
+  for (std::size_t i = 0; i < numNotes; i++)
     {
       midi::NoteTime nt;
       if (set.keyType == 0)
@@ -375,9 +375,9 @@ void ConcreteMotif::generate(AbstractMotif abstr, MotifConcreteSettings set)
 }
 
 //Adds this concrete motif to a NoteTrack starting at begin
-void ConcreteMotif::addToTrack(midi::NoteTrack& nt, uint32_t begin)
+void ConcreteMotif::addToTrack(midi::NoteTrack& nt, std::uint32_t begin)
 {
-  for (size_t i = 0; i < notes_.size(); i++)
+  for (std::size_t i = 0; i < notes_.size(); i++)
     {
       midi::NoteTime note = notes_[i];
       note.begin += begin;
@@ -386,11 +386,11 @@ void ConcreteMotif::addToTrack(midi::NoteTrack& nt, uint32_t begin)
 }
 
 //Returns the length of the motif in ticks
-uint32_t ConcreteMotif::ticks() const
+std::uint32_t ConcreteMotif::ticks() const
 {
-  uint32_t longest = 0;
+  std::uint32_t longest = 0;
 
-  for (size_t i = 0; i < notes_.size(); i++)
+  for (std::size_t i = 0; i < notes_.size(); i++)
     {
       if (notes_[i].begin + notes_[i].duration > longest)
         {

@@ -19,9 +19,9 @@
 //Time units could be anything, should be specified when used
 struct AbstractNoteTime
 {
-  int8_t note;
-  uint32_t begin;
-  uint32_t duration;
+  std::int8_t note;
+  std::uint32_t begin;
+  std::uint32_t duration;
 };
 
 //Helper struct for AbstractMotif generation
@@ -32,11 +32,11 @@ struct MotifGenSettings
 
   //Constructor to set up required fields and optionally strictness
   //If no strictness specified, sets to minimum
-  MotifGenSettings(float inLength, std::mt19937* inGen, uint8_t strict = 1);
+  MotifGenSettings(float inLength, std::mt19937* inGen, std::uint8_t strict = 1);
   
   //Sets up values corresponding to a certain strictness
   //Does not set length or gen!
-  void setStrictness(uint8_t strict);
+  void setStrictness(std::uint8_t strict);
 
   //--- Strictness Independent Variables ---
   //The length of the motif in whole notes
@@ -47,7 +47,7 @@ struct MotifGenSettings
 
   //--- Strictness Dependent Variables ---
   //If setStrictness used to generate this, this stores the given value
-  uint8_t strictness;
+  std::uint8_t strictness;
   
   //A value of X here will make notes align their start time to a
   //multiple of notelength/X. A value of 0 means to not try to align.
@@ -58,7 +58,7 @@ struct MotifGenSettings
 
   //When 0, notes are chosen randomly in the octave
   //When 1, notes are selected from a normal dist centered on last note
-  uint8_t noteSelection;
+  std::uint8_t noteSelection;
 
   
 };
@@ -71,41 +71,41 @@ struct MotifConcreteSettings
 
   //Constructor to set up required fields and optionally strictness
   //If no strictness specified, sets to minimum
-  MotifConcreteSettings(midi::Note inKey, uint8_t inType, uint32_t inMut,
-                        midi::Instrument inInst, uint32_t inTPQ,
-                        bool inForceStart, int8_t inStart, std::mt19937* inGen,
-                        uint8_t strict = 1);
+  MotifConcreteSettings(midi::Note inKey, std::uint8_t inType, std::uint32_t inMut,
+                        midi::Instrument inInst, std::uint32_t inTPQ,
+                        bool inForceStart, std::int8_t inStart, std::mt19937* inGen,
+                        std::uint8_t strict = 1);
   
   //Sets up values corresponding to a certain strictness
   //Currently has no effect
-  void setStrictness(uint8_t strictness);
+  void setStrictness(std::uint8_t strictness);
 
   //--- Strictness Independent Variables ---
   //The key of the concrete motif
   midi::Note key;
 
   //The type of key (0=major, 1=harmonic 2=natural minor)
-  uint8_t keyType;
+  std::uint8_t keyType;
 
   //The points that can be spent on mutations
-  uint32_t mutations;
+  std::uint32_t mutations;
 
   //The instrument that will play this motif
   midi::Instrument instrument;
 
   //The conversion between abstract and concrete time
-  uint32_t ticksPerQuarter;
+  std::uint32_t ticksPerQuarter;
 
   //A note (in abstract format) to forcibly start the motif around
   bool forceStartNote;
-  int8_t startNote;
+  std::int8_t startNote;
 
   //A pointer to a Mersenne Twister to be used in generation
   std::mt19937* gen;
 
   //--- Strictness Dependent Variables ---
   //If setStrictness used to generate this, this stores the given value
-  uint8_t strictness;
+  std::uint8_t strictness;
 };
 
 //An abstract motif, which contains the main information about a motif but lacks
@@ -119,13 +119,16 @@ class AbstractMotif
 
   //General use functions
   void generate(const MotifGenSettings& set);
-  size_t numNotes() {return notes_.size();}
-  void addToNote(uint32_t note, int8_t change) {notes_[note].note += change;}
+  std::size_t numNotes() {return notes_.size();}
+  void addToNote(std::uint32_t note, std::int8_t change)
+  {
+    notes_[note].note += change;
+  }
 
   //Accessors
   AbstractNoteTime note(int n) const {return notes_[n];}
   float length() const {return length_;}
-  size_t numNotes() const {return notes_.size();}
+  std::size_t numNotes() const {return notes_.size();}
   
  private:
   //This is a collection of notes in an unspecified scale
@@ -147,8 +150,8 @@ class ConcreteMotif
 
   //General use functions
   void generate(AbstractMotif abstr, MotifConcreteSettings set);
-  void addToTrack(midi::NoteTrack& nt, uint32_t begin);
-  uint32_t ticks() const;
+  void addToTrack(midi::NoteTrack& nt, std::uint32_t begin);
+  std::uint32_t ticks() const;
   
  private:
   //A collection of notes, with time units being MIDI ticks

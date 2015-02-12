@@ -12,7 +12,7 @@
 #include "piece.hpp"
 
 #include <chrono>
-#include <math.h>
+#include <cmath>
 
 //Default constructor, sets to minimum strictness
 PieceSettings::PieceSettings() :
@@ -25,14 +25,14 @@ PieceSettings::PieceSettings() :
 //Constructor to set up required fields and optionally strictness
 //If no strictness specified, sets to minimum
 PieceSettings::PieceSettings(float inLength, midi::Instrument inInst,
-                             uint8_t strict) :
+                             std::uint8_t strict) :
   length(inLength),
   instrumentMel(inInst)
 {
   setStrictness(strict);
 }
 
-void PieceSettings::setStrictness(uint8_t strict)
+void PieceSettings::setStrictness(std::uint8_t strict)
 {
   strictness = strict;
 
@@ -80,17 +80,17 @@ void Piece::generate(PieceSettings set)
   MotifGenSettings amSet(1, &gen, set.strictness);
   
   std::vector<AbstractMotif> globalMotifs;
-  for (uint8_t i = 0; i < set.length/10; i++)
+  for (std::uint8_t i = 0; i < set.length/10; i++)
     {
       //allowFractionalMotifs true: length can be 1, 1.5 , or 2
       if (set.allowFractionalMotifs)
         {
-          std::uniform_int_distribution<uint8_t> distMotifLen(0,2);
+          std::uniform_int_distribution<std::uint8_t> distMotifLen(0,2);
           amSet.length = (float(distMotifLen(gen))/2) + 1;
         }
       else //Otherwise, Length can be 1 or 2
         {
-          std::uniform_int_distribution<uint8_t> distMotifLen(0,1);
+          std::uniform_int_distribution<std::uint8_t> distMotifLen(0,1);
           amSet.length = distMotifLen(gen) + 1;
         }
       
@@ -98,25 +98,25 @@ void Piece::generate(PieceSettings set)
     }
 
   //Choose some keys to base the piece in
-  std::uniform_int_distribution<uint8_t> distKey(midi::Note("G3").midiVal(),
+  std::uniform_int_distribution<std::uint8_t> distKey(midi::Note("G3").midiVal(),
                                                  midi::Note("C5").midiVal());
-  std::uniform_int_distribution<uint8_t> distKeyNum(2,5);
+  std::uniform_int_distribution<std::uint8_t> distKeyNum(2,5);
   std::vector<midi::Note> keys;
-  for(uint8_t i = 0; i < distKeyNum(gen); i++)
+  for(std::uint8_t i = 0; i < distKeyNum(gen); i++)
     {
       keys.push_back(midi::Note(distKey(gen)));
     }
 
   //Choose a type of key for the piece to be based in
-  std::uniform_int_distribution<uint8_t> distKeyType(0,2);
-  uint8_t keyType = distKeyType(gen);
+  std::uniform_int_distribution<std::uint8_t> distKeyType(0,2);
+  std::uint8_t keyType = distKeyType(gen);
 
   //Generate a bunch of abstract themes with varying length and concreteness
   std::vector<AbstractTheme> abstrThemes;
   ThemeGenSettings atSet(0, globalMotifs, 0, &gen, set.strictness);
-  std::uniform_int_distribution<uint8_t> distThemeLen(3,6);
+  std::uniform_int_distribution<std::uint8_t> distThemeLen(3,6);
   std::uniform_real_distribution<float> distConcrete(0,1);
-  for (uint16_t i = 0; i < set.numThemes; i++)
+  for (std::uint16_t i = 0; i < set.numThemes; i++)
     {
       atSet.length = distThemeLen(gen);
       atSet.concreteness = distConcrete(gen);
@@ -125,12 +125,12 @@ void Piece::generate(PieceSettings set)
 
   //Now concretize it!
   std::vector<ConcreteTheme> concThemes;
-  uint32_t length = 0;
+  std::uint32_t length = 0;
   ThemeConcreteSettings ctSet(0, keyType, set.maxMutations, set.instrumentMel,
                               1500 /*No justifiation*/, &gen, set.strictness);
 
-  std::uniform_int_distribution<uint8_t> distAbsTheme(0, set.numThemes-1);
-  std::uniform_int_distribution<uint8_t> distSelectKey(0, keys.size()-1);
+  std::uniform_int_distribution<std::uint8_t> distAbsTheme(0, set.numThemes-1);
+  std::uniform_int_distribution<std::uint8_t> distSelectKey(0, keys.size()-1);
   while (length < set.length)
     {
       ctSet.key = keys[distSelectKey(gen)];
@@ -141,8 +141,8 @@ void Piece::generate(PieceSettings set)
 
   //Put them all in the NoteTrack
   notes_.clear();
-  uint32_t totalTicks = 0;
-  for (size_t i = 0; i < concThemes.size(); i++)
+  std::uint32_t totalTicks = 0;
+  for (std::size_t i = 0; i < concThemes.size(); i++)
     {
       concThemes[i].addToTrack(notes_, totalTicks);
       totalTicks += concThemes[i].ticks();

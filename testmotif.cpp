@@ -47,7 +47,7 @@ int main()
   ConcreteMotif cm5(am, set2);
 
   //Combine
-  uint32_t totalTicks = 0;
+  std::uint32_t totalTicks = 0;
   midi::NoteTrack nt;
   cm1.addToTrack(nt, totalTicks);
   totalTicks += cm1.ticks() + 2000;

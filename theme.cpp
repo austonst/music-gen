@@ -24,7 +24,7 @@ ThemeGenSettings::ThemeGenSettings() :
 //Constructor to set up required fields and optionally strictness
 //If no strictness specified, sets to minimum
 ThemeGenSettings::ThemeGenSettings(float inLength, std::vector<AbstractMotif>& inMotifs,
-                                   float inConc, std::mt19937* inGen, uint8_t strict) :
+                                   float inConc, std::mt19937* inGen, std::uint8_t strict) :
   length(inLength),
   motifs(inMotifs),
   concreteness(inConc),
@@ -33,7 +33,7 @@ ThemeGenSettings::ThemeGenSettings(float inLength, std::vector<AbstractMotif>& i
   setStrictness(strict);
 }
 
-void ThemeGenSettings::setStrictness(uint8_t strict)
+void ThemeGenSettings::setStrictness(std::uint8_t strict)
 {
   strictness = strict;
   
@@ -83,10 +83,10 @@ ThemeConcreteSettings::ThemeConcreteSettings() :
 
 //Constructor to set up required fields and optionally strictness
 //If no strictness specified, sets to minimum
-ThemeConcreteSettings::ThemeConcreteSettings(midi::Note inKey, uint8_t inType,
-                                             uint32_t inMut, midi::Instrument inInst,
-                                             uint32_t inTPQ, std::mt19937* inGen,
-                                             uint8_t strict) :
+ThemeConcreteSettings::ThemeConcreteSettings(midi::Note inKey, std::uint8_t inType,
+                                             std::uint32_t inMut, midi::Instrument inInst,
+                                             std::uint32_t inTPQ, std::mt19937* inGen,
+                                             std::uint8_t strict) :
   key(inKey),
   keyType(inType),
   maxMutations(inMut),
@@ -97,7 +97,7 @@ ThemeConcreteSettings::ThemeConcreteSettings(midi::Note inKey, uint8_t inType,
   setStrictness(strict);
 }
 
-void ThemeConcreteSettings::setStrictness(uint8_t strict)
+void ThemeConcreteSettings::setStrictness(std::uint8_t strict)
 {
   strictness = strict;
   
@@ -132,8 +132,8 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
   MotifGenSettings mgs15(1.5, set.gen, set.strictness);
   MotifGenSettings mgs2(2, set.gen, set.strictness);
 
-  std::uniform_int_distribution<uint8_t> distTimeSig(0,2);
-  uint8_t timesig = distTimeSig(*(set.gen));
+  std::uniform_int_distribution<std::uint8_t> distTimeSig(0,2);
+  std::uint8_t timesig = distTimeSig(*(set.gen));
   if (timesig == 0) //3 beats per measure
     {
       mgs1.length *= 3./4.;
@@ -153,10 +153,10 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
 
   //Even amounts of local and global motifs
   std::vector<AbstractMotif> localMotifs;
-  std::uniform_int_distribution<uint8_t> distLen(0,2);
-  for (size_t i = 0; i < set.motifs.size(); i++)
+  std::uniform_int_distribution<std::uint8_t> distLen(0,2);
+  for (std::size_t i = 0; i < set.motifs.size(); i++)
     {
-      uint8_t rand = distLen(*(set.gen));
+      std::uint8_t rand = distLen(*(set.gen));
       if (rand == 0)
         {
           localMotifs.push_back(AbstractMotif(mgs1));
@@ -175,9 +175,9 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
   //Fill the theme with motifs
   float length = 0;
   motifs_.clear();
-  std::uniform_int_distribution<uint16_t> distMotif(0,2*localMotifs.size()-1);
+  std::uniform_int_distribution<std::uint16_t> distMotif(0,2*localMotifs.size()-1);
   AbstractMotif prevMotif;
-  uint8_t repeatCount = 0;
+  std::uint8_t repeatCount = 0;
   while (length < set.length)
     {
       //Select motif
@@ -186,7 +186,7 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
       //If extraRepeatWeight false, choose motif at random
       if (!set.extraRepeatWeight || length == 0)
         {
-          uint16_t rand = distMotif(*(set.gen));
+          std::uint16_t rand = distMotif(*(set.gen));
           if (rand > localMotifs.size()-1)
             {
               select = localMotifs[rand-localMotifs.size()];
@@ -207,7 +207,7 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
             }
           else
             {
-              uint16_t rand = distMotif(*(set.gen));
+              std::uint16_t rand = distMotif(*(set.gen));
               if (rand > localMotifs.size()-1)
                 {
                   select = localMotifs[rand-localMotifs.size()];
@@ -230,7 +230,7 @@ void AbstractTheme::generate(const ThemeGenSettings& set)
             }
           else
             {
-              uint16_t rand = distMotif(*(set.gen));
+              std::uint16_t rand = distMotif(*(set.gen));
               if (rand > localMotifs.size()-1)
                 {
                   select = localMotifs[rand-localMotifs.size()];
@@ -276,7 +276,7 @@ void ConcreteTheme::generate(const AbstractTheme abstr, ThemeConcreteSettings se
 
   //Concretize each AbstractMotif
   motifs_.clear();
-  for (size_t i = 0; i < abstr.numMotifs(); i++)
+  for (std::size_t i = 0; i < abstr.numMotifs(); i++)
     {
       float rand;
       do {rand = distMut(*(set.gen));} while (rand < 0);
@@ -292,10 +292,10 @@ void ConcreteTheme::generate(const AbstractTheme abstr, ThemeConcreteSettings se
 }
 
 //Adds this theme to a NoteTrack
-void ConcreteTheme::addToTrack(midi::NoteTrack& nt, uint32_t begin)
+void ConcreteTheme::addToTrack(midi::NoteTrack& nt, std::uint32_t begin)
 {
-  uint32_t offset = 0;
-  for (size_t i = 0; i < motifs_.size(); i++)
+  std::uint32_t offset = 0;
+  for (std::size_t i = 0; i < motifs_.size(); i++)
     {
       motifs_[i].addToTrack(nt, begin+offset);
       offset += motifs_[i].ticks();
@@ -303,10 +303,10 @@ void ConcreteTheme::addToTrack(midi::NoteTrack& nt, uint32_t begin)
 }
 
 //Return the total number of ticks in this theme
-uint32_t ConcreteTheme::ticks() const
+std::uint32_t ConcreteTheme::ticks() const
 {
-  uint32_t count = 0;
-  for (size_t i = 0; i < motifs_.size(); i++)
+  std::uint32_t count = 0;
+  for (std::size_t i = 0; i < motifs_.size(); i++)
     {
       count += motifs_[i].ticks();
     }
