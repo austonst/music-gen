@@ -55,12 +55,6 @@ struct MotifGenSettings
 
   //Force the first note of the motif to be 0
   bool forceFirstNote0;
-
-  //When 0, notes are chosen randomly in the octave
-  //When 1, notes are selected from a normal dist centered on last note
-  std::uint8_t noteSelection;
-
-  
 };
 
 //Helper struct for ConcreteMotif generation from an AbstractMotif

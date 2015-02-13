@@ -43,31 +43,26 @@ void MotifGenSettings::setStrictness(std::uint8_t strict)
     {
       noteAlign = 0;
       forceFirstNote0 = false;
-      noteSelection = 0;
     }
   else if (strictness == 2)
     {
       noteAlign = 0;
       forceFirstNote0 = false;
-      noteSelection = 1;
     }
   else if (strictness == 3)
     {
       noteAlign = 8;
       forceFirstNote0 = false;
-      noteSelection = 1;
     }
   else if (strictness == 4)
     {
       noteAlign = 4;
       forceFirstNote0 = true;
-      noteSelection = 1;
     }
   else // >= 5
     {
       noteAlign = 2;
       forceFirstNote0 = true;
-      noteSelection = 1;
     }
 }
 
@@ -181,12 +176,7 @@ void AbstractMotif::generate(const MotifGenSettings& set)
         {
           ant.note = 0;
         }
-      //If noteSelection is 0, note can be anywhere in the scale of the octave
-      else if (set.noteSelection == 0)
-        {
-          ant.note = distNote(*(set.gen));
-        }
-      else //noteSelection=1: note is selected using normal distribution
+      else
         {
           std::normal_distribution<float> distNormNote(lastNote, 2);
           float normNote;
